@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JBVG Seed</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0c10;
+      color: #c9a84c;
+      font-family: 'DM Mono', 'Courier New', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-size: 13px;
+    }
+    .seed-container {
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 0.6s ease forwards 0.2s;
+    }
+    .seed-mark {
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      color: #444;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .seed-status {
+      color: #c9a84c;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+    }
+    .seed-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #c9a84c;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="seed-container">
+    <div class="seed-mark">JBVG Seed Carrier</div>
+    <div class="seed-status"><span class="seed-dot"></span><span id="status">Resolving...</span></div>
+  </div>
+
+  <script src="skybridge.js"></script>
+  <script>
+    (async function () {
+      const el = document.getElementById("status");
+
+      try {
+        await SkyBridge.reload();
+        const s = SkyBridge.status();
+
+        if (s.manifestLoaded) {
+          el.textContent = "Seed active. Routing to Core.";
+          setTimeout(() => {
+            window.location.href = SkyBridge.url("core.root");
+          }, 800);
+        } else {
+          el.textContent = "Manifest unavailable. Check Core.";
+        }
+      } catch (e) {
+        el.textContent = "Seed error: " + e.message;
+      }
+    })();
+  </script>
+</body>
+</html>

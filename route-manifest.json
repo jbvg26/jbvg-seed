@@ -1,0 +1,250 @@
+{
+  "version": "0.2",
+  "operator": "JBVG",
+  "issued_by": "core.jbventuresgroupinc.com",
+  "issued_at": null,
+  "signature": null,
+  "services": {
+    "core": {
+      "description": "JBVG Core runtime authority",
+      "priority": [
+        "lan",
+        "local",
+        "public"
+      ],
+      "routes": {
+        "lan": "http://10.0.0.34:7710",
+        "local": "http://localhost:7710",
+        "public": "https://core.jbventuresinc.biz"
+      },
+      "endpoints": {
+        "core.root": {
+          "path": "/",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "core.lan": {
+          "path": "/_lan",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "core.auth.exchange": {
+          "path": "/auth/exchange",
+          "method": "POST",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "core.auth.login": {
+          "path": "/login",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "core.fn.getClients": {
+          "path": "/fn/getClients",
+          "method": "POST",
+          "live_required": false,
+          "ghost_fallback": true
+        },
+        "core.fn.runTrajectoryAssessment": {
+          "path": "/fn/runTrajectoryAssessment",
+          "method": "POST",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "core.fn.sendCustomEmail": {
+          "path": "/fn/sendCustomEmail",
+          "method": "POST",
+          "live_required": false,
+          "ghost_fallback": true
+        },
+        "core.bundle.latest": {
+          "path": "/bundle/jbvg-core-latest.tar.gz",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "core.serve.engagementPacket": {
+          "path": "/hub/engagement-packet.html",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        }
+      }
+    },
+    "ghost": {
+      "description": "JBVG Ghost persistence and replay node",
+      "priority": [
+        "local",
+        "public"
+      ],
+      "routes": {
+        "local": "http://localhost:4020",
+        "public": "https://ghost.jbventuresgroupinc.com"
+      },
+      "endpoints": {
+        "ghost.root": {
+          "path": "/",
+          "method": "GET",
+          "live_required": false,
+          "ghost_fallback": false
+        },
+        "ghost.cache.queue": {
+          "path": "/_cache/queue",
+          "method": "POST",
+          "live_required": false,
+          "ghost_fallback": false
+        },
+        "ghost.cache.flush": {
+          "path": "/_cache/flush",
+          "method": "POST",
+          "live_required": false,
+          "ghost_fallback": false
+        },
+        "ghost.replay.append": {
+          "path": "/_replay",
+          "method": "POST",
+          "live_required": false,
+          "ghost_fallback": false
+        }
+      }
+    },
+    "api": {
+      "description": "JBVG public API surface",
+      "priority": [
+        "public"
+      ],
+      "routes": {
+        "public": "https://api.jbventuresgroupinc.com"
+      },
+      "endpoints": {
+        "api.root": {
+          "path": "/",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        }
+      }
+    },
+    "hub": {
+      "description": "JBVG client-facing hub and app delivery",
+      "priority": [
+        "public"
+      ],
+      "routes": {
+        "public": "https://hub.jbventuresgroupinc.com"
+      },
+      "endpoints": {
+        "hub.root": {
+          "path": "/",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "hub.ida.inquiryForm": {
+          "path": "/IDA_Inquiry_Form.html",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "hub.lumina.pay": {
+          "path": "/LuminaPay.html",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "hub.client.dossier": {
+          "path": "/client-dossier.html",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "hub.serve.engagementPacket": {
+          "path": "/engagement-packet.html",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        },
+        "hub.serve.simulation": {
+          "path": "/jbvg-simulation.html",
+          "method": "GET",
+          "live_required": true,
+          "ghost_fallback": false
+        }
+      }
+    },
+    "site": {
+      "description": "JBVG public marketing and identity site",
+      "priority": [
+        "public"
+      ],
+      "routes": {
+        "public": "https://jbventuresgroupinc.com"
+      },
+      "endpoints": {
+        "site.root": {
+          "path": "/",
+          "method": "GET",
+          "live_required": false,
+          "ghost_fallback": false
+        },
+        "site.home": {
+          "path": "/home",
+          "method": "GET",
+          "live_required": false,
+          "ghost_fallback": false
+        },
+        "site.ida": {
+          "path": "/ida",
+          "method": "GET",
+          "live_required": false,
+          "ghost_fallback": false
+        },
+        "site.methodology": {
+          "path": "/methodology",
+          "method": "GET",
+          "live_required": false,
+          "ghost_fallback": false
+        },
+        "site.privacy": {
+          "path": "/privacy",
+          "method": "GET",
+          "live_required": false,
+          "ghost_fallback": false
+        },
+        "site.terms": {
+          "path": "/terms",
+          "method": "GET",
+          "live_required": false,
+          "ghost_fallback": false
+        }
+      }
+    },
+    "payment": {
+      "description": "JBVG payment processing -- Stripe coordinated, build last",
+      "priority": [
+        "public"
+      ],
+      "routes": {
+        "public": "https://core.jbventuresinc.biz"
+      },
+      "endpoints": {
+        "core.fn.createPaymentIntent": {
+          "path": "/fn/createPaymentIntent",
+          "method": "POST",
+          "live_required": true,
+          "ghost_fallback": false,
+          "note": "Stripe coordination required -- build last"
+        }
+      }
+    }
+  },
+  "_meta": {
+    "skybridge_version": "0.2",
+    "carrier": "seed.jbventuresgroupinc.com",
+    "authority": "core.jbventuresgroupinc.com",
+    "note": "Served by seed carrier, signed and authoritative from Core. Verify signature against Core public key embedded in SkyBridge.js before trusting routes."
+  }
+}
