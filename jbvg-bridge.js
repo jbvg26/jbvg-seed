@@ -34,6 +34,7 @@ const DEVICE_ID   = args.device  || "jbvg-device";
 const LISTEN_PORT = parseInt(args.port || "9000");
 const PEER_ID     = args.peer    || null;
 const CORE_URL    = args.core    || "https://core.jbventuresinc.biz";
+const SELF_IP     = args.ip      || null;
 const KEEPALIVE_MS = parseInt(args.keepalive || "10000"); // 10s keepalive
 const POLL_MS      = parseInt(args.poll      || "3000");  // 3s peer poll
 
@@ -76,6 +77,7 @@ async function register() {
   try {
     const res = await post(`${CORE_URL}/fn/rendezvousWrite`, {
       deviceId: DEVICE_ID,
+      ip:       SELF_IP || undefined,
       port:     LISTEN_PORT,
       ttl:      60000, // 60s TTL, keepalive will re-register
       meta:     { nodeVersion: process.version, platform: process.platform }
