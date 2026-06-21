@@ -29,49 +29,64 @@
       text-transform: uppercase;
       margin-bottom: 8px;
     }
-    .seed-status {
-      color: #c9a84c;
-      font-size: 13px;
-      letter-spacing: 0.1em;
-    }
+    .seed-status { color: #c9a84c; font-size: 13px; letter-spacing: 0.1em; }
     .seed-dot {
       display: inline-block;
-      width: 6px;
-      height: 6px;
+      width: 6px; height: 6px;
       background: #c9a84c;
       border-radius: 50%;
       margin-right: 8px;
       animation: pulse 1.4s ease-in-out infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.2; }
-    }
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
+    .seed-mode { font-size: 10px; color: #333; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 8px; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+    @keyframes fadeIn { to { opacity: 1; } }
   </style>
 </head>
 <body>
   <div class="seed-container">
     <div class="seed-mark">JBVG Seed Carrier</div>
     <div class="seed-status"><span class="seed-dot"></span><span id="status">Resolving...</span></div>
+    <div class="seed-mode" id="mode"></div>
   </div>
 
+  <script src="skybridge-db.js"></script>
   <script src="skybridge.js"></script>
   <script>
     (async function () {
-      const el = document.getElementById("status");
+      const el   = document.getElementById("status");
+      const mode = document.getElementById("mode");
+      const debug = window.location.search.includes("debug");
+
+      if ("serviceWorker" in navigator) {
+        try {
+          const reg = await navigator.serviceWorker.register("/skybridge-sw.js", { scope: "/" });
+          console.log("[SkyBridge:Seed] SW registered:", reg.scope);
+        } catch (e) {
+          console.warn("[SkyBridge:Seed] SW registration failed:", e.message);
+        }
+      }
+
+      try { await SkyBridgeDB.init(); } catch (e) { console.warn("[SkyBridge:Seed] DB init failed:", e.message); }
 
       try {
         await SkyBridge.reload();
         const s = SkyBridge.status();
 
         if (s.manifestLoaded) {
-          el.textContent = "Seed active. Routing to Core.";
-          setTimeout(() => {
-            window.location.href = SkyBridge.url("core.root");
-          }, 800);
+          try {
+            const health = await fetch("https://core.jbventuresinc.biz/_health", { signal: AbortSignal.timeout(3000) });
+            if (health.ok || health.status === 401) {
+              el.textContent = "Seed active. Routing to Core.";
+              mode.textContent = "Live Mode";
+              if (!debug) setTimeout(() => { window.location.href = SkyBridge.url("core.root"); }, 800);
+            } else { throw new Error("Core unhealthy"); }
+          } catch (_) {
+            el.textContent = "Core unreachable. Continuity mode active.";
+            mode.textContent = "Continuity Mode";
+            await SkyBridgeDB.setState("continuity_mode", true);
+            await SkyBridgeDB.setState("continuity_since", Date.now());
+          }
         } else {
           el.textContent = "Manifest unavailable. Check Core.";
         }
