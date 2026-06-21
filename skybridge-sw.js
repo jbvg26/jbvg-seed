@@ -15,9 +15,10 @@ const DATA_CACHE    = `${SW_VERSION}-data`;
 
 // Assets to cache on install -- the SkyBridge shell
 const SHELL_ASSETS = [
-  "/seed/skybridge.js",
-  "/seed/route-manifest.json",
-  "/seed/index.html",
+  "/skybridge.js",
+  "/route-manifest.json",
+  "/index.html",
+  "/skybridge-db.js",
 ];
 
 // ── Install ───────────────────────────────────────────────────
