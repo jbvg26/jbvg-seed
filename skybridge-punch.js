@@ -26,6 +26,7 @@ const DEVICE_ID   = args.device  || 'jbvg-device';
 const PEER_ID     = args.peer    || null;
 const PUNCH_PORT  = parseInt(args.port || '7701');
 const CORE_URL    = args.core    || 'https://core.jbventuresinc.biz';
+const SELF_IP     = args.ip      || null;
 const PUNCH_INTERVAL_MS = 500;  // punch every 500ms
 const REGISTER_INTERVAL_MS = 10000; // re-register every 10s
 
@@ -87,6 +88,7 @@ async function register() {
   try {
     const res = await post(`${CORE_URL}/fn/rendezvousWrite`, {
       deviceId: DEVICE_ID,
+      ip:       SELF_IP || undefined,
       port:     PUNCH_PORT,
       ttl:      60000,
       meta:     { nodeId: NODE_ID, type: 'punch' }
