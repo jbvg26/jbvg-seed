@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyBridge STUN Probe</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0c10;
+      color: #c9a84c;
+      font-family: 'DM Mono', 'Courier New', monospace;
+      padding: 20px;
+      font-size: 13px;
+    }
+    h1 {
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    .label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #444;
+      margin-bottom: 6px;
+      margin-top: 16px;
+    }
+    .candidate {
+      background: #111318;
+      border: 1px solid #1e2128;
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      word-break: break-all;
+      line-height: 1.6;
+    }
+    .candidate.srflx {
+      border-color: #c9a84c;
+      color: #c9a84c;
+    }
+    .candidate.relay {
+      border-color: #4c9ac9;
+      color: #4c9ac9;
+    }
+    .candidate.host {
+      color: #555;
+    }
+    .highlight {
+      background: #1a1600;
+      border: 1px solid #c9a84c;
+      border-radius: 4px;
+      padding: 12px;
+      margin-top: 16px;
+    }
+    .highlight .ip { font-size: 18px; color: #fff; font-weight: bold; }
+    .highlight .port { font-size: 18px; color: #c9a84c; font-weight: bold; }
+    .status {
+      color: #555;
+      margin-top: 12px;
+      font-size: 11px;
+    }
+    .status.done { color: #4caf50; }
+    button {
+      background: #c9a84c;
+      color: #0a0c10;
+      border: none;
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-top: 16px;
+    }
+    button:active { opacity: 0.8; }
+    .copy-btn {
+      background: #1e2128;
+      color: #c9a84c;
+      font-size: 10px;
+      padding: 4px 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <h1>SkyBridge STUN Probe</h1>
+  <p style="color:#555;font-size:11px;margin-bottom:16px;">Discovers real public IP:port assigned by carrier CGNAT via WebRTC ICE</p>
+
+  <button onclick="runProbe()">Run STUN Probe</button>
+
+  <div id="output" style="margin-top:20px;"></div>
+
+  <script>
+    const STUN_SERVERS = [
+      "stun:stun.l.google.com:19302",
+      "stun:stun1.l.google.com:19302",
+      "stun:stun.cloudflare.com:3478",
+    ];
+
+    async function runProbe() {
+      const out = document.getElementById("output");
+      out.innerHTML = '<div class="status">Probing STUN servers...</div>';
+
+      const candidates = [];
+      const srflxCandidates = [];
+
+      const pc = new RTCPeerConnection({
+        iceServers: STUN_SERVERS.map(u => ({ urls: u }))
+      });
+
+      // Create a dummy data channel to trigger ICE gathering
+      pc.createDataChannel("skybridge-probe");
+
+      pc.onicecandidate = (e) => {
+        if (!e.candidate) return;
+
+        const c = e.candidate.candidate;
+        candidates.push(c);
+
+        // Parse candidate string
+        // a=candidate:foundation component protocol priority ip port typ type
+        const parts = c.split(" ");
+        const ip       = parts[4];
+        const port     = parts[5];
+        const type     = parts[7];
+        const protocol = parts[2];
+
+        if (type === "srflx") {
+          srflxCandidates.push({ ip, port, protocol, raw: c });
+        }
+
+        renderCandidates(candidates, srflxCandidates);
+      };
+
+      pc.onicegatheringstatechange = () => {
+        if (pc.iceGatheringState === "complete") {
+          const statusEl = document.querySelector(".status");
+          if (statusEl) {
+            statusEl.textContent = "ICE gathering complete.";
+            statusEl.className = "status done";
+          }
+          pc.close();
+        }
+      };
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+    }
+
+    function renderCandidates(all, srflx) {
+      const out = document.getElementById("output");
+
+      let html = "";
+
+      if (srflx.length > 0) {
+        html += '<div class="label">Server Reflexive (CGNAT public endpoints)</div>';
+        srflx.forEach(c => {
+          html += `
+            <div class="highlight">
+              <div style="font-size:11px;color:#555;margin-bottom:6px;">PUBLIC ENDPOINT DISCOVERED</div>
+              <span class="ip">${c.ip}</span><span style="color:#555"> : </span><span class="port">${c.port}</span>
+              <span style="color:#555;font-size:11px;margin-left:8px;">${c.protocol.toUpperCase()}</span>
+              <button class="copy-btn" onclick="navigator.clipboard.writeText('${c.ip}:${c.port}')">Copy</button>
+              <div style="color:#333;font-size:10px;margin-top:8px;word-break:break-all;">${c.raw}</div>
+            </div>`;
+        });
+      }
+
+      html += '<div class="label" style="margin-top:20px;">All ICE Candidates</div>';
+      all.forEach(c => {
+        const parts = c.split(" ");
+        const type  = parts[7] || "unknown";
+        html += `<div class="candidate ${type}">[${type}] ${c}</div>`;
+      });
+
+      html += '<div class="status">Gathering...</div>';
+      out.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
