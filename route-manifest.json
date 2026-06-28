@@ -13,8 +13,8 @@
         "public"
       ],
       "routes": {
-        "lan": "http://10.0.0.34:7710",
-        "local": "http://localhost:7710",
+        "lan": "http://10.0.0.34:4010",
+        "local": "http://localhost:4010",
         "public": "https://core.jbventuresinc.biz"
       },
       "endpoints": {
